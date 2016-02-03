@@ -5,6 +5,10 @@ var distanceText = $('#distance span');
 var squareElement  = $('#element');
 var MAX_INTENSE = 255;
 var HITBOX_SIZE = 5;
+var socket = io("http://localhost:3000");
+
+
+        
 
 function HitBox(x,y,width,height){
 
@@ -18,21 +22,20 @@ var offset = squareElement.offset();
 var squareHitBox = new HitBox(offset.left,offset.top, squareElement.width(), squareElement.height());
 
 function calculateDistance(elem, mouseX, mouseY) {
-    return Math.floor(Math.sqrt(Math.pow(mouseX - (elem.offset().left+(elem.width()/2)), 2) + Math.pow(mouseY - (elem.offset().top+(elem.height()/2)), 2)));
+    return Math.floor(Math.sqrt(Math.pow(mouseX - (elem.offset().left+(elem.width()/2)), 2) 
+    	+ Math.pow(mouseY - (elem.offset().top+(elem.height()/2)), 2)));
 }
 
 function areIntersected(A,B){
 
-	if ((A.X + A.width < B.X) || (B.X + B.width < A.X) || (A.Y + A.height < B.Y) || (B.Y + B.height < A.Y)){
-
+	if ((A.X + A.width < B.X) || (B.X + B.width < A.X) || (A.Y + A.height < B.Y) ||
+	 (B.Y + B.height < A.Y)){
 		return false;
 	}
-
 	return true;
 }
 
-				
-
+			
 $(document).mousemove(function(e) {  
 
     mX = e.pageX;
@@ -56,9 +59,14 @@ $(document).mousemove(function(e) {
 		results.push(areIntersected(squareHitBox,hitBoxes[i]));
 	}
 
-	
-
-    distanceText.text(distance + " " + results.join(" "));
+	results.push(distance);
+    distanceText.text(results.join(" "));
+    socket.emit('activationData',results);
     
 
+});
+
+socket.on('connect', function () {
+
+    console.log("Connected to socketIO");
 });
